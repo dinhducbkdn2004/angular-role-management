@@ -1,7 +1,8 @@
-import { LocalStorageService } from './local-storage.service';
-import { inject, Injectable } from "@angular/core";
+import { inject, Injectable, signal, computed } from "@angular/core";
+import { delay, map, of, Observable } from "rxjs";
+
 import { AuthResponse, LoginRequest, User } from "../models";
-import { BehaviorSubject, delay, map, of, Observable } from "rxjs";
+import { LocalStorageService } from './local-storage.service';
 import { MockDataService } from './mock-data.service';
 
 @Injectable({providedIn:'root'})
@@ -9,14 +10,19 @@ export class AuthService {
     private readonly TOKEN_KEY = 'auth_token';
     private readonly USER_KEY = 'current_user';
 
-    private currentUserSubject = new BehaviorSubject<User | null>(null);
-    public currentUser$ = this.currentUserSubject.asObservable();
+    private currentUserSignal = signal<User | null>(null);
+    private tokenSignal = signal<string | null>(null);
 
-    private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
-    public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+    public readonly currentUser = this.currentUserSignal.asReadonly();
+    public readonly isAuthenticated = computed(() => !!this.currentUser() && !!this.tokenSignal());
+    public readonly isAdmin = computed(() => this.currentUser()?.role === 'admin');
+    public readonly isUser = computed(() => this.currentUser()?.role === 'user');
 
-    private localStorageService = inject(LocalStorageService);
-    private mockDataService = inject(MockDataService);
+    public readonly currentUser$ = this.currentUser;
+    public readonly isAuthenticated$ = this.isAuthenticated;
+
+    private readonly localStorageService = inject(LocalStorageService);
+    private readonly mockDataService = inject(MockDataService);
 
     constructor() {
         this.initializeAuthState();
@@ -27,8 +33,8 @@ export class AuthService {
         const savedToken = this.localStorageService.getItem<string>(this.TOKEN_KEY);
     
         if (savedUser && savedToken) {
-          this.currentUserSubject.next(savedUser);
-          this.isAuthenticatedSubject.next(true);
+          this.currentUserSignal.set(savedUser);
+          this.tokenSignal.set(savedToken);
         }
     }
 
@@ -50,8 +56,8 @@ export class AuthService {
                 this.localStorageService.setItem(this.USER_KEY, user);
                 this.localStorageService.setItem(this.TOKEN_KEY, token);
 
-                this.currentUserSubject.next(user);
-                this.isAuthenticatedSubject.next(true);
+                this.currentUserSignal.set(user);
+                this.tokenSignal.set(token);
 
                 return { user, token };
             })
@@ -62,34 +68,25 @@ export class AuthService {
         this.localStorageService.removeItem(this.USER_KEY);
         this.localStorageService.removeItem(this.TOKEN_KEY);
     
-        this.currentUserSubject.next(null);
-        this.isAuthenticatedSubject.next(false);
+        this.currentUserSignal.set(null);
+        this.tokenSignal.set(null);
     }
 
     getCurrentUser(): User | null {
-        return this.currentUserSubject.value;
-      }
+        return this.currentUser();
+    }
     
-      isAuthenticated(): boolean {
-        return this.isAuthenticatedSubject.value;
-      }
+    isAuthenticatedMethod(): boolean {
+        return this.isAuthenticated();
+    }
     
-      hasRole(role: 'admin' | 'user'): boolean {
-        const currentUser = this.getCurrentUser();
-        return currentUser?.role === role;
-      }
+    hasRole(role: 'admin' | 'user'): boolean {
+        return this.currentUser()?.role === role;
+    }
     
-      isAdmin(): boolean {
-        return this.hasRole('admin');
-      }
-    
-      isUser(): boolean {
-        return this.hasRole('user');
-      }
-    
-      getToken(): string | null {
-        return this.localStorageService.getItem<string>(this.TOKEN_KEY);
-      }
+    getToken(): string | null {
+        return this.tokenSignal();
+    }
     
       private generateMockToken(user: User): string {
         const payload = {
