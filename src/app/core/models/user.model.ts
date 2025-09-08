@@ -1,10 +1,10 @@
 export interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
   role: 'admin' | 'user';
   fullName: string;
-  createAt: Date;
+  createdAt: Date;
 }
 
 export interface LoginRequest {
