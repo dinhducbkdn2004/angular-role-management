@@ -8,7 +8,6 @@
 
         <!-- Login Form -->
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-
             <!-- General Error -->
             @if (generalError) {
             <div class="error-message general-error">
@@ -20,7 +19,7 @@
             <div class="form-group">
                 <label for="username">Username</label>
                 <input id="username" type="text" formControlName="username" class="form-control"
-                    [class.error]="getFieldError('username')" placeholder="Enter your username">
+                    [class.error]="getFieldError('username')" placeholder="Enter your username" />
                 @if (getFieldError('username')) {
                 <div class="error-message">
                     {{ getFieldError('username') }}
@@ -32,7 +31,7 @@
             <div class="form-group">
                 <label for="password">Password</label>
                 <input id="password" type="password" formControlName="password" class="form-control"
-                    [class.error]="getFieldError('password')" placeholder="Enter your password">
+                    [class.error]="getFieldError('password')" placeholder="Enter your password" />
                 @if (getFieldError('password')) {
                 <div class="error-message">
                     {{ getFieldError('password') }}
@@ -43,7 +42,7 @@
             <!-- Remember Me -->
             <div class="form-group checkbox-group">
                 <label class="checkbox-label">
-                    <input type="checkbox" formControlName="rememberMe">
+                    <input type="checkbox" formControlName="rememberMe" />
                     <span class="checkmark"></span>
                     Remember me
                 </label>

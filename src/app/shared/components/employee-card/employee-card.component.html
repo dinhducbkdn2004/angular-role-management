@@ -1,0 +1,30 @@
+<div class="employee-card" [class.selected]="isSelected()" (click)="onCardClick()">
+    <div class="card-header">
+        <div class="employee-avatar">
+            <span class="avatar-text">{{ employee().fullName.charAt(0) }}</span>
+        </div>
+        <div class="employee-basic-info">
+            <h4 class="employee-name">{{ employee().fullName }}</h4>
+            <p class="employee-position">{{ employee().position }}</p>
+        </div>
+        <span class="status" [class]="employee().status">{{ employee().status }}</span>
+    </div>
+    <div class="card-body">
+        <div class="info-row">
+            <span class="info-label">Department</span>
+            <span class="info-value">{{ employee().department }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Salary</span>
+            <span class="info-value">{{ formatSalary(employee().salary) }}</span>
+        </div>
+    </div>
+    <div class="card-footer">
+        <button class="action-btn edit" (click)="onEdit($event)">
+            Edit
+        </button>
+        <button class="action-btn delete" (click)="onDelete($event)">
+            Delete
+        </button>
+    </div>
+</div>

@@ -1,0 +1,75 @@
+/* Loading Component Styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+/* Spinner */
+.loading-spinner {
+  border: 2px solid #e5e5e5;
+  border-top: 2px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Size Variants */
+.loading-small .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 1px;
+}
+
+.loading-medium .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-width: 2px;
+}
+
+.loading-large .loading-spinner {
+  width: 60px;
+  height: 60px;
+  border-width: 3px;
+}
+
+/* Message */
+.loading-message {
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.loading-small .loading-message {
+  font-size: 0.75rem;
+}
+
+.loading-large .loading-message {
+  font-size: 1rem;
+}
+
+/* Overlay variant for full screen loading */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

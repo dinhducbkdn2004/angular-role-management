@@ -1,0 +1,29 @@
+<div class="dashboard">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1 class="welcome-title">Welcome back, {{ currentUser()?.fullName }}</h1>
+        <p class="welcome-subtitle">{{ currentDate | date: 'fullDate' }}</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+    <div class="loading-state">
+        <app-loading [size]="'medium'" [message]="'Loading dashboard data...'" />
+    </div>
+    } @else {
+
+    <!-- Department Overview -->
+    <div class="departments-section">
+        <h2 class="section-title">Department Overview</h2>
+        <div class="departments-grid">
+            @for (dept of departments(); track dept.name) {
+            <div class="department-card">
+                <h4>{{ dept.name }}</h4>
+                <div class="department-count">{{ dept.count }} employees</div>
+                <div class="department-salary">Avg: {{ formatSalary(dept.averageSalary) }}</div>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>

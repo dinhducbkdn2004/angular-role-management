@@ -67,7 +67,6 @@ export class MockDataService {
   }
 
   findUserByCredentials(username: string, password: string): User | null {
-    // Mock password validation - in real app, this would be hashed passwords
     const validCredentials = [
       { username: 'admin', password: 'admin123' },
       { username: 'user', password: 'user123' }

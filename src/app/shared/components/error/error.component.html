@@ -1,0 +1,18 @@
+<div class="error-container">
+
+    <h3 class="error-title">{{ error().title }}</h3>
+    <p class="error-message">{{ error().message }}</p>
+
+    <div class="error-actions">
+        @if (error().showRetry) {
+        <button class="btn btn-primary" (click)="onRetry()">
+            Try Again
+        </button>
+        }
+        @if (error().actionLabel) {
+        <button class="btn btn-secondary" (click)="onAction()">
+            {{ error().actionLabel }}
+        </button>
+        }
+    </div>
+</div>

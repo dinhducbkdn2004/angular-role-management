@@ -3,14 +3,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
 
 .login-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   padding: 40px;
   width: 100%;
   max-width: 420px;
@@ -84,7 +83,7 @@
 }
 
 .form-control {
-  padding: 12px 16px;
+  padding: 8px 10px;
   border: 2px solid #e1e5e9;
   border-radius: 8px;
   font-size: 16px;
@@ -94,8 +93,8 @@
 
 .form-control:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #333333;
+  box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.15);
 }
 
 .form-control.error {
@@ -124,15 +123,15 @@
 
 .checkbox-label input[type='checkbox'] {
   margin-right: 8px;
-  width: 18px;
-  height: 18px;
-  accent-color: #667eea;
+  width: 16px;
+  height: 16px;
+  accent-color: #333333;
 }
 
 /* Submit Button */
 .login-btn {
-  padding: 14px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 10px;
+  background: #333333;
   color: white;
   border: none;
   border-radius: 8px;
@@ -148,7 +147,7 @@
 }
 
 .login-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
@@ -156,25 +155,6 @@
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
-}
-
-/* Loading Spinner */
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 /* Error Messages */
@@ -194,20 +174,6 @@
   border-radius: 6px;
   margin-bottom: 20px;
   font-size: 14px;
-}
-
-/* Footer */
-.login-footer {
-  text-align: center;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #e9ecef;
-}
-
-.login-footer p {
-  color: #6c757d;
-  font-size: 12px;
-  margin: 0;
 }
 
 /* Responsive */
