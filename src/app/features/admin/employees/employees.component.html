@@ -1,0 +1,189 @@
+<div class="employees-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Employee Management</h1>
+            <p>Manage your company employees</p>
+        </div>
+        <button class="btn btn-primary" (click)="showAddEmployeeForm()">
+            <span class="btn-icon">➕</span>
+            Add Employee
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+        <input type="text" placeholder="Search employees..." [(ngModel)]="searchTerm" (input)="onSearch()"
+            class="search-input" />
+    </div>
+
+    <div class="content-layout">
+        <!-- Employee List -->
+        <div class="employee-list">
+            <div class="list-header">
+                <h3>Employees ({{ filteredEmployees().length }})</h3>
+            </div>
+
+            @if (isLoading()) {
+            <div class="loading">
+                <app-loading [size]="'small'" [message]="'Loading employees...'" />
+            </div>
+            } @else {
+            @if (filteredEmployees().length === 0) {
+            <div class="empty-state">
+                <h3>No employees found</h3>
+                <p>Try adjusting your search or add a new employee</p>
+            </div>
+            } @else {
+            <div class="employee-cards">
+                @for (employee of filteredEmployees(); track employee.id) {
+                <app-employee-card [employee]="employee" [isSelected]="selectedEmployee()?.id === employee.id"
+                    (cardClick)="viewEmployee($event)" (edit)="editEmployee($event)"
+                    (delete)="deleteEmployee($event)" />
+                }
+            </div>
+            }
+            }
+        </div>
+
+        <!-- Employee Details / Forms -->
+        <div class="employee-details">
+            @if (showAddForm() || showEditForm()) {
+            <!-- Add/Edit Form -->
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>{{ showEditForm() ? 'Edit Employee' : 'Add New Employee' }}</h2>
+                    <button class="close-btn" (click)="cancelForm()">×</button>
+                </div>
+
+                <form (ngSubmit)="saveEmployee()" class="employee-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" [(ngModel)]="newEmployee.fullName" name="fullName" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" [(ngModel)]="newEmployee.email" name="email" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" [(ngModel)]="newEmployee.phone" name="phone" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Position</label>
+                            <input type="text" [(ngModel)]="newEmployee.position" name="position" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Department</label>
+                            <select [(ngModel)]="newEmployee.department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="IT">IT</option>
+                                <option value="HR">HR</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Sales">Sales</option>
+                                <option value="Design">Design</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Salary (VND)</label>
+                            <input type="number" [(ngModel)]="newEmployee.salary" name="salary" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select [(ngModel)]="newEmployee.status" name="status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            {{ showEditForm() ? 'Update Employee' : 'Create Employee' }}
+                        </button>
+                        <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+                            <span class="btn-icon">✖️</span>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            } @else if (selectedEmployee()) {
+            <!-- Employee Details View -->
+            <div class="details-container">
+                <div class="details-header">
+                    <div class="employee-profile">
+                        <div class="profile-info">
+                            <h2>{{ selectedEmployee()!.fullName }}</h2>
+                            <p>{{ selectedEmployee()!.position }}</p>
+                            <span class="status" [class]="selectedEmployee()!.status">
+                                {{ selectedEmployee()!.status }}
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" (click)="editEmployee(selectedEmployee()!)">
+                        Edit Employee
+                    </button>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-card">
+                        <label>Email</label>
+                        <p>{{ selectedEmployee()!.email }}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <label>Phone</label>
+                        <p>{{ selectedEmployee()!.phone }}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <label>Department</label>
+                        <p>{{ selectedEmployee()!.department }}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <label>Salary</label>
+                        <p>{{ formatSalary(selectedEmployee()!.salary) }}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <label>Start Date</label>
+                        <p>{{ formatDate(selectedEmployee()!.startDate) }}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <label>Employee ID</label>
+                        <p>#{{ selectedEmployee()!.id }}</p>
+                    </div>
+                </div>
+            </div>
+            } @else {
+            <!-- Welcome Message -->
+            <div class="welcome-message">
+                <h2>Employee Management</h2>
+                <p>
+                    Select an employee from the list to view their details, or click "Add Employee" to
+                    create a new employee record.
+                </p>
+                <div class="welcome-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ filteredEmployees().length }}</span>
+                        <span class="stat-label">Total Employees</span>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>

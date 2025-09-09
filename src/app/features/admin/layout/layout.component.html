@@ -1,0 +1,17 @@
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <app-sidebar [isOpen]="isSidebarOpen()" (toggleSidebar)="toggleSidebar()">
+    </app-sidebar>
+
+    <!-- Main Content -->
+    <div class="main-content" [class.sidebar-collapsed]="!isSidebarOpen()">
+        <!-- Header -->
+        <app-header title="Admin Dashboard" [currentUser]="currentUser()" (logout)="logout()">
+        </app-header>
+
+        <!-- Content Area -->
+        <main class="page-content">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>

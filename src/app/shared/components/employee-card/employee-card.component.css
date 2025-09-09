@@ -1,0 +1,173 @@
+/* Employee Card Styles */
+.employee-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.employee-card:hover {
+  border-color: #666;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.employee-card.selected {
+  border-color: #333;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.employee-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-text {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.employee-basic-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.employee-name {
+  margin: 0 0 0.25rem 0;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.employee-position {
+  margin: 0;
+  color: #666;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status.active {
+  background: #e8f5e8;
+  color: #2d5016;
+  border: 1px solid #c3e6c3;
+}
+
+.status.inactive {
+  background: #f8e8e8;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Card Body */
+.card-body {
+  margin-bottom: 0.75rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #333;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Card Footer */
+.card-footer {
+  display: flex;
+  gap: 0.5rem;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 0.75rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn.edit {
+  background: #e5e5e5;
+  color: #333;
+}
+
+.action-btn.edit:hover {
+  background: #d4d4d4;
+}
+
+.action-btn.delete {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.action-btn.delete:hover {
+  background: #f1b2b7;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .employee-card {
+    padding: 0.75rem;
+  }
+
+  .card-header {
+    margin-bottom: 0.5rem;
+  }
+
+  .employee-name {
+    font-size: 0.85rem;
+  }
+
+  .employee-position {
+    font-size: 0.75rem;
+  }
+}

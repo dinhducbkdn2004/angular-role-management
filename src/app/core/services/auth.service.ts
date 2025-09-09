@@ -34,8 +34,12 @@ export class AuthService {
         const savedToken = this.localStorageService.getItem<string>(this.TOKEN_KEY);
     
         if (savedUser && savedToken) {
-          this.currentUserSignal.set(savedUser);
-          this.tokenSignal.set(savedToken);
+          if (this.isTokenValid(savedToken)) {
+            this.currentUserSignal.set(savedUser);
+            this.tokenSignal.set(savedToken);
+          } else {
+            this.logout();
+          }
         }
     }
 
@@ -94,9 +98,18 @@ export class AuthService {
           userId: user.id,
           username: user.username,
           role: user.role,
-          exp: Date.now() + (24 * 60 * 60 * 1000)
+          exp: Date.now() + (24 * 60 * 60 * 1000) // 24 giờ
         };
         
         return btoa(JSON.stringify(payload));
+      }
+
+      private isTokenValid(token: string): boolean {
+        try {
+          const payload = JSON.parse(atob(token));
+          return payload.exp > Date.now();
+        } catch {
+          return false;
+        }
       }
 }
