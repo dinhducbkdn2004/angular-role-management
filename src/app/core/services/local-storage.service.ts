@@ -1,16 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocalStorageService {
-  private readonly isStorageAvailable: boolean;
+  private readonly isBrowser: boolean;
+  private readonly platformId = inject(PLATFORM_ID);
 
   constructor() {
-    this.isStorageAvailable = this.checkStorageAvailability();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   private checkStorageAvailability(): boolean {
+    if (!this.isBrowser) {
+      return false;
+    }
+    
     try {
       const test = '__localStorage_test__';
       localStorage.setItem(test, test);
@@ -22,8 +28,7 @@ export class LocalStorageService {
   }
 
   setItem(key: string, value: any): boolean {
-    if (!this.isStorageAvailable) {
-      console.warn('localStorage is not available');
+    if (!this.checkStorageAvailability()) {
       return false;
     }
 
@@ -38,8 +43,7 @@ export class LocalStorageService {
   }
 
   getItem<T>(key: string): T | null {
-    if (!this.isStorageAvailable) {
-      console.warn('localStorage is not available');
+    if (!this.checkStorageAvailability()) {
       return null;
     }
 
@@ -53,8 +57,7 @@ export class LocalStorageService {
   }
 
   removeItem(key: string): boolean {
-    if (!this.isStorageAvailable) {
-      console.warn('localStorage is not available');
+    if (!this.checkStorageAvailability()) {
       return false;
     }
 
@@ -68,8 +71,7 @@ export class LocalStorageService {
   }
 
   clear(): boolean {
-    if (!this.isStorageAvailable) {
-      console.warn('localStorage is not available');
+    if (!this.checkStorageAvailability()) {
       return false;
     }
 
@@ -83,14 +85,14 @@ export class LocalStorageService {
   }
 
   hasItem(key: string): boolean {
-    if (!this.isStorageAvailable) {
+    if (!this.checkStorageAvailability()) {
       return false;
     }
     return localStorage.getItem(key) !== null;
   }
 
   getKeys(): string[] {
-    if (!this.isStorageAvailable) {
+    if (!this.checkStorageAvailability()) {
       return [];
     }
 
@@ -105,7 +107,7 @@ export class LocalStorageService {
   }
 
   getSize(): number {
-    if (!this.isStorageAvailable) {
+    if (!this.checkStorageAvailability()) {
       return 0;
     }
     return localStorage.length;
