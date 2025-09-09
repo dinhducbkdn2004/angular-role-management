@@ -160,17 +160,4 @@ export class EmployeesComponent implements OnInit {
     this.showEditForm.set(false);
     this.selectedEmployee.set(null);
   }
-
-  formatSalary(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }
-
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('vi-VN');
-  }
 }

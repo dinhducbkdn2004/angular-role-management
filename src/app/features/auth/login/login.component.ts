@@ -57,7 +57,7 @@ export class LoginComponent {
         if (response.user.role === 'admin') {
           this.router.navigateByUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
         } else {
-          this.router.navigateByUrl(ROUTE_PATHS.USER.DASHBOARD);
+          this.router.navigateByUrl(ROUTE_PATHS.USER.EMPLOYEES);
         }
       },
       error: (error) => {

@@ -72,6 +72,7 @@ export class AuthService {
     logout(): void {
         this.localStorageService.removeItem(this.USER_KEY);
         this.localStorageService.removeItem(this.TOKEN_KEY);
+        this.localStorageService.removeItem(STORAGE_KEYS.EMPLOYEES_DATA);
     
         this.currentUserSignal.set(null);
         this.tokenSignal.set(null);

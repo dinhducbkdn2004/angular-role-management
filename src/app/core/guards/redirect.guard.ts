@@ -12,7 +12,7 @@ export const redirectGuard: CanActivateFn = () => {
     if (authService.hasRole('admin')) {
       return router.parseUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
     } else {
-      return router.parseUrl(ROUTE_PATHS.USER.DASHBOARD);
+      return router.parseUrl(ROUTE_PATHS.USER.EMPLOYEES);
     }
   } else {
     return router.parseUrl(ROUTE_PATHS.AUTH.LOGIN);
