@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
+import { ROUTE_PATHS } from '../constants';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
@@ -10,6 +11,6 @@ export const authGuard: CanActivateFn = () => {
   if (authService.isAuthenticatedMethod()) {
     return true;
   } else {
-    return router.parseUrl('/auth/login');
+    return router.parseUrl(ROUTE_PATHS.AUTH.LOGIN);
   }
 };

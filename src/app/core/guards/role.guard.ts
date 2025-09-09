@@ -1,9 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 
+import { ROUTE_PATHS } from '../constants';
 import { AuthService } from '../services/auth.service';
 
-export const roleGuard = (allowedRoles: Array<'admin' | 'user'>): CanActivateFn => {
+export interface RoleGuardConfig {
+  allowedRoles: Array<'admin' | 'user'>;
+  redirectPath?: string;
+  fallbackByRole?: boolean;
+}
+
+export const roleGuard = (config: RoleGuardConfig): CanActivateFn => {
   return () => {
     const authService = inject(AuthService);
     const router = inject(Router);
@@ -11,18 +18,32 @@ export const roleGuard = (allowedRoles: Array<'admin' | 'user'>): CanActivateFn 
     const currentUser = authService.currentUser();
 
     if (!currentUser) {
-      return router.parseUrl('/auth/login');
+      return router.parseUrl(ROUTE_PATHS.AUTH.LOGIN);
     }
 
-    if (allowedRoles.includes(currentUser.role)) {
+    if (config.allowedRoles.includes(currentUser.role)) {
       return true;
     } else {
-      // Redirect based on role with proper routing structure
-      if (currentUser.role === 'user') {
-        return router.parseUrl('/user/dashboard');
-      } else {
-        return router.parseUrl('/admin/dashboard');
+      if (config.redirectPath) {
+        return router.parseUrl(config.redirectPath);
       }
+
+      if (config.fallbackByRole !== false) {
+        if (currentUser.role === 'user') {
+          return router.parseUrl(ROUTE_PATHS.USER.DASHBOARD);
+        } else {
+          return router.parseUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
+        }
+      }
+
+      return router.parseUrl(ROUTE_PATHS.AUTH.LOGIN);
     }
   };
 };
+
+export const adminOnlyGuard = (): CanActivateFn => roleGuard({ allowedRoles: ['admin'] });
+
+export const userOnlyGuard = (): CanActivateFn => roleGuard({ allowedRoles: ['user'] });
+
+export const authenticatedUserGuard = (): CanActivateFn =>
+  roleGuard({ allowedRoles: ['admin', 'user'] });
