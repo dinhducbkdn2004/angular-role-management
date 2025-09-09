@@ -1,0 +1,147 @@
+<div class="user-employees">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <lucide-icon [img]="Users" class="title-icon"></lucide-icon>
+        Company Directory
+      </h1>
+      <p class="page-subtitle">Browse and view employee information</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <app-loading [size]="'medium'" [message]="'Loading employees...'" />
+    </div>
+  } @else {
+    <!-- Statistics Cards -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{ employeeStats().total }}</div>
+          <div class="stat-label">Total Employees</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ employeeStats().active }}</div>
+          <div class="stat-label">Active Employees</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ employeeStats().departments }}</div>
+          <div class="stat-label">Departments</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <div class="filters-content">
+        <!-- Search Filter -->
+        <div class="search-filter">
+          <div class="search-input-container">
+            <lucide-icon [img]="Search" class="search-icon"></lucide-icon>
+            <input
+              type="text"
+              placeholder="Search employees..."
+              class="search-input"
+              (input)="onSearchChange($event)"
+              [value]="searchTerm()"
+            />
+          </div>
+        </div>
+
+        <!-- Department Filter -->
+        <div class="department-filter">
+          <select
+            class="department-select"
+            (change)="onDepartmentChange($event)"
+            [value]="selectedDepartment()"
+          >
+            <option value="all">All Departments</option>
+            @for (dept of departments(); track dept) {
+              <option [value]="dept">{{ dept }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="results-summary">
+      <p class="results-text">
+        Showing {{ filteredEmployees().length }} of {{ employees().length }} employees
+      </p>
+    </div>
+
+    <!-- Employees Grid -->
+    <div class="employees-section">
+      @if (filteredEmployees().length > 0) {
+        <div class="employees-grid">
+          @for (employee of filteredEmployees(); track employee.id) {
+            <div class="employee-card">
+              <div class="employee-header">
+                <div class="employee-avatar">
+                  {{ employee.fullName | initials }}
+                </div>
+                <div class="employee-info">
+                  <h3 class="employee-name">{{ employee.fullName }}</h3>
+                  <p class="employee-position">{{ employee.position }}</p>
+                  <div class="employee-department">{{ employee.department }}</div>
+                </div>
+                <div class="employee-status">
+                  <span class="status-badge" [ngClass]="getStatusClass(employee.status)">
+                    {{ employee.status | titlecase }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="employee-details">
+                <div class="detail-row">
+                  <lucide-icon [img]="Mail" class="detail-icon"></lucide-icon>
+                  <span class="detail-text">{{ employee.email }}</span>
+                </div>
+                <div class="detail-row">
+                  <lucide-icon [img]="Phone" class="detail-icon"></lucide-icon>
+                  <span class="detail-text">{{ employee.phone }}</span>
+                </div>
+                <div class="detail-row">
+                  <lucide-icon [img]="Calendar" class="detail-icon"></lucide-icon>
+                  <span class="detail-text"
+                    >Joined {{ employee.startDate | date: 'MMM d, y' }}</span
+                  >
+                </div>
+              </div>
+
+              <div class="employee-actions">
+                <button
+                  class="view-btn"
+                  (click)="viewEmployee(employee)"
+                  type="button"
+                  title="View Details"
+                >
+                  <lucide-icon [img]="Eye" class="btn-icon"></lucide-icon>
+                  View Details
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="no-results">
+          <div class="no-results-content">
+            <lucide-icon [img]="Users" class="no-results-icon"></lucide-icon>
+            <h3 class="no-results-title">No employees found</h3>
+            <p class="no-results-text">
+              @if (searchTerm()) {
+                Try adjusting your search terms or filters.
+              } @else {
+                There are no employees to display at the moment.
+              }
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

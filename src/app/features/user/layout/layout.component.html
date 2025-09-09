@@ -1,0 +1,27 @@
+<div class="user-layout">
+  <!-- Simple header for user interface -->
+  <header class="user-header">
+    <div class="header-content">
+      <div class="brand">
+        <lucide-icon [img]="Home" class="brand-icon"></lucide-icon>
+        <span class="brand-text">Employee Portal</span>
+      </div>
+
+      <div class="user-info">
+        <div class="user-details">
+          <span class="user-name">{{ currentUser()?.fullName }}</span>
+          <span class="user-role">Employee</span>
+        </div>
+        <button class="logout-btn" (click)="logout()" type="button">
+          <lucide-icon [img]="LogOut" class="logout-icon"></lucide-icon>
+          <span class="logout-text">Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <main class="user-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -8,7 +8,7 @@ export const ROUTE_PATHS = {
     EMPLOYEES: '/admin/employees',
   },
   USER: {
-    DASHBOARD: '/user/dashboard',
+    EMPLOYEES: '/user/employees',
     PROFILE: '/user/profile',
   },
   PUBLIC: {

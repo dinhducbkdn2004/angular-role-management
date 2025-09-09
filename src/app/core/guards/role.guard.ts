@@ -30,7 +30,7 @@ export const roleGuard = (config: RoleGuardConfig): CanActivateFn => {
 
       if (config.fallbackByRole !== false) {
         if (currentUser.role === 'user') {
-          return router.parseUrl(ROUTE_PATHS.USER.DASHBOARD);
+          return router.parseUrl(ROUTE_PATHS.USER.EMPLOYEES);
         } else {
           return router.parseUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
         }

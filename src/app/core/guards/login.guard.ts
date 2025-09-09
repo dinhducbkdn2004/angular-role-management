@@ -12,7 +12,7 @@ export const loginGuard: CanActivateFn = () => {
     if (authService.hasRole('admin')) {
       return router.parseUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
     } else if (authService.hasRole('user')) {
-      return router.parseUrl(ROUTE_PATHS.USER.DASHBOARD);
+      return router.parseUrl(ROUTE_PATHS.USER.EMPLOYEES);
     }
   }
 

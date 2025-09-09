@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, loginGuard, redirectGuard, roleGuard } from './core';
+import { redirectGuard } from './core';
 
 export const routes: Routes = [
   // Default redirect
@@ -13,68 +13,19 @@ export const routes: Routes = [
   // Auth routes (public)
   {
     path: 'auth',
-    canActivate: [loginGuard],
-    children: [
-      {
-        path: 'login',
-        loadComponent: () =>
-          import('./features/auth/login/login.component').then((m) => m.LoginComponent),
-      },
-      {
-        path: '',
-        redirectTo: 'login',
-        pathMatch: 'full',
-      },
-    ],
+    loadChildren: () => import('./features').then((m) => m.authRoutes),
   },
 
   // Admin routes (protected)
   {
     path: 'admin',
-    canActivate: [authGuard, roleGuard({ allowedRoles: ['admin'] })],
-    loadComponent: () =>
-      import('./features/admin/layout/layout.component').then((m) => m.LayoutComponent),
-    children: [
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/admin/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
-          ),
-      },
-      {
-        path: 'employees',
-        loadComponent: () =>
-          import('./features/admin/employees/employees.component').then(
-            (m) => m.EmployeesComponent
-          ),
-      },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
-    ],
+    loadChildren: () => import('./features').then((m) => m.adminRoutes),
   },
 
   // User routes (protected)
   {
     path: 'user',
-    canActivate: [authGuard],
-    children: [
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./features/user/dashboard/user-dashboard.component').then(
-            (m) => m.UserDashboardComponent
-          ),
-      },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
-    ],
+    loadChildren: () => import('./features').then((m) => m.userRoutes),
   },
 
   // Wildcard route
