@@ -4,11 +4,12 @@ import { delay, map, of, Observable } from "rxjs";
 import { AuthResponse, LoginRequest, User } from "../models";
 import { LocalStorageService } from './local-storage.service';
 import { MockDataService } from './mock-data.service';
+import { STORAGE_KEYS } from '../constants';
 
 @Injectable({providedIn:'root'})
 export class AuthService {
-    private readonly TOKEN_KEY = 'auth_token';
-    private readonly USER_KEY = 'current_user';
+    private readonly TOKEN_KEY = STORAGE_KEYS.AUTH_TOKEN;
+    private readonly USER_KEY = STORAGE_KEYS.CURRENT_USER;
 
     private currentUserSignal = signal<User | null>(null);
     private tokenSignal = signal<string | null>(null);
