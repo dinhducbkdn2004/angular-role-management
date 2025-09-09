@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { authGuard } from '../../core';
+import { authGuard, roleGuard } from '../../core';
 
 export const userRoutes: Routes = [
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard({ allowedRoles: ['user'] })],
     loadComponent: () => import('./layout/layout.component').then((m) => m.UserLayoutComponent),
     children: [
       {
