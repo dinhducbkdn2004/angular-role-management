@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { loginGuard } from '../../core';
+import { loginPageGuard } from '../../core';
 
 export const authRoutes: Routes = [
   {
     path: '',
-    canActivate: [loginGuard],
+    canActivate: [loginPageGuard],
     children: [
       {
         path: 'login',

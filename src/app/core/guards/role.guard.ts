@@ -40,10 +40,3 @@ export const roleGuard = (config: RoleGuardConfig): CanActivateFn => {
     }
   };
 };
-
-export const adminOnlyGuard = (): CanActivateFn => roleGuard({ allowedRoles: ['admin'] });
-
-export const userOnlyGuard = (): CanActivateFn => roleGuard({ allowedRoles: ['user'] });
-
-export const authenticatedUserGuard = (): CanActivateFn =>
-  roleGuard({ allowedRoles: ['admin', 'user'] });

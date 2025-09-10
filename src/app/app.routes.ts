@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
 
-import { redirectGuard } from './core';
+import { autoRedirectGuard } from './core';
 
 export const routes: Routes = [
   // Default redirect
   {
     path: '',
-    canActivate: [redirectGuard],
+    canActivate: [autoRedirectGuard],
     children: [],
   },
 
