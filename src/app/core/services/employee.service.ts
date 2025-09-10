@@ -1,6 +1,4 @@
 import { inject, Injectable, signal, computed } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay, map } from 'rxjs/operators';
 
 import { Employee, CreateEmployeeRequest, UpdateEmployeeRequest } from '../models';
 import { MockDataService } from './mock-data.service';
@@ -12,12 +10,26 @@ import { LocalStorageService } from './local-storage.service';
 export class EmployeeService {
   private readonly EMPLOYEES_KEY = 'employees_data';
   
+  // Signals for reactive state management
   private employeesSignal = signal<Employee[]>([]);
+  private isLoadingSignal = signal<boolean>(false);
+  private errorSignal = signal<string | null>(null);
+  
+  // Public readonly signals
   public readonly employees = this.employeesSignal.asReadonly();
   public readonly employeeCount = computed(() => this.employees().length);
   public readonly hasEmployees = computed(() => this.employees().length > 0);
+  public readonly isLoading = this.isLoadingSignal.asReadonly();
+  public readonly error = this.errorSignal.asReadonly();
   
-  public readonly employees$ = this.employees;
+  // Computed queries
+  public readonly activeEmployees = computed(() => 
+    this.employees().filter(emp => emp.status === 'active')
+  );
+  public readonly departments = computed(() => {
+    const depts = this.employees().map(emp => emp.department);
+    return [...new Set(depts)].sort();
+  });
 
   private readonly localStorageService = inject(LocalStorageService);
   private readonly mockDataService = inject(MockDataService);
@@ -41,96 +53,139 @@ export class EmployeeService {
     this.localStorageService.setItem(this.EMPLOYEES_KEY, employees);
   }
 
-  getAllEmployees(): Observable<Employee[]> {
-    return of(this.employees()).pipe(delay(300));
+  getEmployeeById(id: string): Employee | null {
+    return this.employees().find(emp => emp.id === id) || null;
   }
 
-  getEmployeeById(id: string): Observable<Employee | null> {
-    return of(this.employees()).pipe(
-      delay(200),
-      map((employees: Employee[]) => employees.find(emp => emp.id === id) || null)
+  searchEmployees(searchTerm: string): Employee[] {
+    if (!searchTerm.trim()) return this.employees();
+    
+    const term = searchTerm.toLowerCase();
+    return this.employees().filter(emp => 
+      emp.fullName.toLowerCase().includes(term) ||
+      emp.email.toLowerCase().includes(term) ||
+      emp.position.toLowerCase().includes(term) ||
+      emp.department.toLowerCase().includes(term)
     );
   }
 
-  createEmployee(employeeData: CreateEmployeeRequest): Observable<Employee> {
-    return of(null).pipe(
-      delay(500),
-      map(() => {
-        const currentEmployees = this.employees();
-        
-        const emailExists = currentEmployees.some(emp => emp.email === employeeData.email);
+  getEmployeesByDepartment(department: string): Employee[] {
+    if (department === 'all') return this.employees();
+    return this.employees().filter(emp => emp.department === department);
+  }
+
+  async createEmployee(employeeData: CreateEmployeeRequest): Promise<Employee> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const currentEmployees = this.employees();
+      
+      const emailExists = currentEmployees.some(emp => emp.email === employeeData.email);
+      if (emailExists) {
+        throw new Error('Email already exists in the system');
+      }
+
+      const newEmployee: Employee = {
+        id: this.generateId(),
+        ...employeeData,
+        status: 'active'
+      };
+
+      const updatedEmployees = [...currentEmployees, newEmployee];
+      this.employeesSignal.set(updatedEmployees);
+      this.saveEmployeesToStorage(updatedEmployees);
+
+      return newEmployee;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create employee';
+      this.errorSignal.set(errorMessage);
+      throw error;
+    } finally {
+      this.isLoadingSignal.set(false);
+    }
+  }
+
+  async updateEmployee(employeeData: UpdateEmployeeRequest): Promise<Employee> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const currentEmployees = this.employees();
+      const index = currentEmployees.findIndex(emp => emp.id === employeeData.id);
+      
+      if (index === -1) {
+        throw new Error('Employee not found');
+      }
+
+      if (employeeData.email) {
+        const emailExists = currentEmployees.some(
+          emp => emp.email === employeeData.email && emp.id !== employeeData.id
+        );
         if (emailExists) {
           throw new Error('Email already exists in the system');
         }
+      }
 
-        const newEmployee: Employee = {
-          id: this.generateId(),
-          ...employeeData,
-          status: 'active'
-        };
+      const updatedEmployee: Employee = {
+        ...currentEmployees[index],
+        ...employeeData
+      };
 
-        const updatedEmployees = [...currentEmployees, newEmployee];
-        this.employeesSignal.set(updatedEmployees);
-        this.saveEmployeesToStorage(updatedEmployees);
+      const updatedEmployees = [...currentEmployees];
+      updatedEmployees[index] = updatedEmployee;
 
-        return newEmployee;
-      })
-    );
+      this.employeesSignal.set(updatedEmployees);
+      this.saveEmployeesToStorage(updatedEmployees);
+
+      return updatedEmployee;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update employee';
+      this.errorSignal.set(errorMessage);
+      throw error;
+    } finally {
+      this.isLoadingSignal.set(false);
+    }
   }
 
-  updateEmployee(employeeData: UpdateEmployeeRequest): Observable<Employee> {
-    return of(null).pipe(
-      delay(500),
-      map(() => {
-        const currentEmployees = this.employees();
-        const index = currentEmployees.findIndex(emp => emp.id === employeeData.id);
-        
-        if (index === -1) {
-          throw new Error('Employee not found');
-        }
+  async deleteEmployee(id: string): Promise<boolean> {
+    this.isLoadingSignal.set(true);
+    this.errorSignal.set(null);
 
-        if (employeeData.email) {
-          const emailExists = currentEmployees.some(
-            emp => emp.email === employeeData.email && emp.id !== employeeData.id
-          );
-          if (emailExists) {
-            throw new Error('Email already exists in the system');
-          }
-        }
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
 
-        const updatedEmployee: Employee = {
-          ...currentEmployees[index],
-          ...employeeData
-        };
+      const currentEmployees = this.employees();
+      const filteredEmployees = currentEmployees.filter(emp => emp.id !== id);
+      
+      if (filteredEmployees.length === currentEmployees.length) {
+        throw new Error('Employee not found');
+      }
 
-        const updatedEmployees = [...currentEmployees];
-        updatedEmployees[index] = updatedEmployee;
+      this.employeesSignal.set(filteredEmployees);
+      this.saveEmployeesToStorage(filteredEmployees);
 
-        this.employeesSignal.set(updatedEmployees);
-        this.saveEmployeesToStorage(updatedEmployees);
-
-        return updatedEmployee;
-      })
-    );
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete employee';
+      this.errorSignal.set(errorMessage);
+      throw error;
+    } finally {
+      this.isLoadingSignal.set(false);
+    }
   }
 
-  deleteEmployee(id: string): Observable<boolean> {
-    return of(null).pipe(
-      delay(300),
-      map(() => {
-        const currentEmployees = this.employees();
-        const filteredEmployees = currentEmployees.filter(emp => emp.id !== id);
-        
-        if (filteredEmployees.length === currentEmployees.length) {
-          throw new Error('Employee not found');
-        }
+  // Utility methods
+  clearError(): void {
+    this.errorSignal.set(null);
+  }
 
-        this.employeesSignal.set(filteredEmployees);
-        this.saveEmployeesToStorage(filteredEmployees);
-
-        return true;
-      })
-    );
+  refreshEmployees(): void {
+    this.initializeEmployees();
   }
 
   private generateId(): string {

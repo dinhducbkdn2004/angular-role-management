@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -12,17 +12,16 @@ import { LoadingComponent } from '../../../shared/components';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent {
   private readonly authService = inject(AuthService);
   private readonly employeeService = inject(EmployeeService);
   private readonly router = inject(Router);
 
   currentUser = this.authService.currentUser;
-  isLoading = signal(true);
-  employees = signal<Employee[]>([]);
+  employees = this.employeeService.employees;
+  isLoading = this.employeeService.isLoading;
   currentDate = new Date();
 
-  // Computed dashboard data
   dashboardData = computed(() => {
     const employees = this.employees();
     const totalEmployees = employees.length;
@@ -40,7 +39,6 @@ export class DashboardComponent implements OnInit {
     };
   });
 
-  // Computed departments data
   departments = computed(() => {
     const employees = this.employees();
     const deptMap = new Map<string, { count: number; totalSalary: number }>();
@@ -60,24 +58,6 @@ export class DashboardComponent implements OnInit {
       averageSalary: data.totalSalary / data.count
     }));
   });
-
-  ngOnInit(): void {
-    this.loadEmployees();
-  }
-
-  loadEmployees(): void {
-    this.isLoading.set(true);
-    this.employeeService.getAllEmployees().subscribe({
-      next: (employees) => {
-        this.employees.set(employees);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading employees:', error);
-        this.isLoading.set(false);
-      }
-    });
-  }
 
   navigateToEmployees(): void {
     this.router.navigate(['/admin/employees']);

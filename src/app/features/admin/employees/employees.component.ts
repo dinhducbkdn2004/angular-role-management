@@ -15,9 +15,13 @@ import { EmployeeCardComponent, LoadingComponent } from '../../../shared/compone
 export class EmployeesComponent implements OnInit {
   private readonly employeeService = inject(EmployeeService);
 
-  employees = signal<Employee[]>([]);
+  // Use signals directly from service
+  employees = this.employeeService.employees;
+  isLoading = this.employeeService.isLoading;
+  error = this.employeeService.error;
+  
+  // Component-specific signals
   filteredEmployees = signal<Employee[]>([]);
-  isLoading = signal(true);
   searchTerm = signal('');
   selectedEmployee = signal<Employee | null>(null);
   showAddForm = signal(false);
@@ -35,38 +39,11 @@ export class EmployeesComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.loadEmployees();
-  }
-
-  loadEmployees(): void {
-    this.isLoading.set(true);
-    
-    this.employeeService.getAllEmployees().subscribe({
-      next: (employees) => {
-        this.employees.set(employees);
-        this.filteredEmployees.set(employees);
-        this.isLoading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading employees:', error);
-        this.isLoading.set(false);
-      }
-    });
+    this.filteredEmployees.set(this.employees());
   }
 
   onSearch(): void {
-    const term = this.searchTerm().toLowerCase();
-    if (!term) {
-      this.filteredEmployees.set(this.employees());
-      return;
-    }
-
-    const filtered = this.employees().filter(emp => 
-      emp.fullName.toLowerCase().includes(term) ||
-      emp.email.toLowerCase().includes(term) ||
-      emp.position.toLowerCase().includes(term) ||
-      emp.department.toLowerCase().includes(term)
-    );
+    const filtered = this.employeeService.searchEmployees(this.searchTerm());
     this.filteredEmployees.set(filtered);
   }
 
@@ -81,18 +58,16 @@ export class EmployeesComponent implements OnInit {
     this.showEditForm.set(true);
   }
 
-  deleteEmployee(employee: Employee): void {
+  async deleteEmployee(employee: Employee): Promise<void> {
     if (confirm(`Are you sure you want to delete ${employee.fullName}?`)) {
-      this.employeeService.deleteEmployee(employee.id).subscribe({
-        next: () => {
-          this.loadEmployees(); // Reload to get updated data
-          this.selectedEmployee.set(null);
-        },
-        error: (error) => {
-          console.error('Error deleting employee:', error);
-          alert('Failed to delete employee. Please try again.');
-        }
-      });
+      try {
+        await this.employeeService.deleteEmployee(employee.id);
+        this.selectedEmployee.set(null);
+        this.filteredEmployees.set(this.employees()); // Refresh filtered list
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        alert('Failed to delete employee. Please try again.');
+      }
     }
   }
 
@@ -110,48 +85,40 @@ export class EmployeesComponent implements OnInit {
     this.selectedEmployee.set(null);
   }
 
-  saveEmployee(): void {
-    if (this.showEditForm()) {
-      // Update existing employee
-      const updateData = {
-        ...this.newEmployee as Employee,
-        id: this.selectedEmployee()!.id
-      };
+  async saveEmployee(): Promise<void> {
+    try {
+      if (this.showEditForm()) {
+        // Update existing employee
+        const updateData = {
+          ...this.newEmployee as Employee,
+          id: this.selectedEmployee()!.id
+        };
+        
+        await this.employeeService.updateEmployee(updateData);
+        this.showEditForm.set(false);
+        this.selectedEmployee.set(null);
+      } else {
+        // Add new employee
+        const createData = {
+          fullName: this.newEmployee.fullName!,
+          email: this.newEmployee.email!,
+          phone: this.newEmployee.phone!,
+          position: this.newEmployee.position!,
+          department: this.newEmployee.department!,
+          salary: this.newEmployee.salary!,
+          startDate: new Date()
+        };
+        
+        await this.employeeService.createEmployee(createData);
+        this.showAddForm.set(false);
+        this.selectedEmployee.set(null);
+      }
       
-      this.employeeService.updateEmployee(updateData).subscribe({
-        next: () => {
-          this.loadEmployees(); // Reload to get updated data
-          this.showEditForm.set(false);
-          this.selectedEmployee.set(null);
-        },
-        error: (error) => {
-          console.error('Error updating employee:', error);
-          alert('Failed to update employee. Please try again.');
-        }
-      });
-    } else {
-      // Add new employee
-      const createData = {
-        fullName: this.newEmployee.fullName!,
-        email: this.newEmployee.email!,
-        phone: this.newEmployee.phone!,
-        position: this.newEmployee.position!,
-        department: this.newEmployee.department!,
-        salary: this.newEmployee.salary!,
-        startDate: new Date()
-      };
-      
-      this.employeeService.createEmployee(createData).subscribe({
-        next: () => {
-          this.loadEmployees(); // Reload to get updated data
-          this.showAddForm.set(false);
-          this.selectedEmployee.set(null);
-        },
-        error: (error) => {
-          console.error('Error creating employee:', error);
-          alert('Failed to create employee. Please try again.');
-        }
-      });
+      // Refresh filtered list
+      this.filteredEmployees.set(this.employees());
+    } catch (error) {
+      console.error('Error saving employee:', error);
+      alert('Failed to save employee. Please try again.');
     }
   }
 

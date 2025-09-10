@@ -1,7 +1,6 @@
 import { inject, Injectable, signal, computed } from "@angular/core";
-import { delay, map, of, Observable } from "rxjs";
 
-import { AuthResponse, LoginRequest, User } from "../models";
+import { LoginRequest, User } from "../models";
 import { LocalStorageService } from './local-storage.service';
 import { MockDataService } from './mock-data.service';
 import { STORAGE_KEYS } from '../constants';
@@ -11,16 +10,19 @@ export class AuthService {
     private readonly TOKEN_KEY = STORAGE_KEYS.AUTH_TOKEN;
     private readonly USER_KEY = STORAGE_KEYS.CURRENT_USER;
 
+    // Signals for reactive state management
     private currentUserSignal = signal<User | null>(null);
     private tokenSignal = signal<string | null>(null);
+    private isLoadingSignal = signal<boolean>(false);
+    private errorSignal = signal<string | null>(null);
 
+    // Public readonly signals
     public readonly currentUser = this.currentUserSignal.asReadonly();
     public readonly isAuthenticated = computed(() => !!this.currentUser() && !!this.tokenSignal());
     public readonly isAdmin = computed(() => this.currentUser()?.role === 'admin');
     public readonly isUser = computed(() => this.currentUser()?.role === 'user');
-
-    public readonly currentUser$ = this.currentUser;
-    public readonly isAuthenticated$ = this.isAuthenticated;
+    public readonly isLoading = this.isLoadingSignal.asReadonly();
+    public readonly error = this.errorSignal.asReadonly();
 
     private readonly localStorageService = inject(LocalStorageService);
     private readonly mockDataService = inject(MockDataService);
@@ -43,30 +45,38 @@ export class AuthService {
         }
     }
 
-    login(credentials: LoginRequest): Observable<AuthResponse>{
-        return of(null).pipe(
-            delay(1000),
-            map(() => {
-                const user = this.mockDataService.findUserByCredentials(
-                    credentials.username,
-                    credentials.password
-                );
+    async login(credentials: LoginRequest): Promise<User> {
+        this.isLoadingSignal.set(true);
+        this.errorSignal.set(null);
 
-                if(!user){
-                    throw new Error('Username or password is incorrect')
-                }
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-                const token = this.generateMockToken(user);
-                
-                this.localStorageService.setItem(this.USER_KEY, user);
-                this.localStorageService.setItem(this.TOKEN_KEY, token);
+            const user = this.mockDataService.findUserByCredentials(
+                credentials.username,
+                credentials.password
+            );
 
-                this.currentUserSignal.set(user);
-                this.tokenSignal.set(token);
+            if (!user) {
+                throw new Error('Username or password is incorrect');
+            }
 
-                return { user, token };
-            })
-        );
+            const token = this.generateMockToken(user);
+            
+            this.localStorageService.setItem(this.USER_KEY, user);
+            this.localStorageService.setItem(this.TOKEN_KEY, token);
+
+            this.currentUserSignal.set(user);
+            this.tokenSignal.set(token);
+
+            return user;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Login failed';
+            this.errorSignal.set(errorMessage);
+            throw error;
+        } finally {
+            this.isLoadingSignal.set(false);
+        }
     }
 
     logout(): void {
@@ -76,6 +86,8 @@ export class AuthService {
     
         this.currentUserSignal.set(null);
         this.tokenSignal.set(null);
+        this.errorSignal.set(null);
+        this.isLoadingSignal.set(false);
     }
 
     getCurrentUser(): User | null {
@@ -99,7 +111,7 @@ export class AuthService {
           userId: user.id,
           username: user.username,
           role: user.role,
-          exp: Date.now() + (24 * 60 * 60 * 1000) // 24 giờ
+          exp: Date.now() + (24 * 60 * 60 * 1000)
         };
         
         return btoa(JSON.stringify(payload));

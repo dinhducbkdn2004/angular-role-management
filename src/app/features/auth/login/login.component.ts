@@ -24,50 +24,35 @@ export class LoginComponent {
     rememberMe: [false]
   });
 
-  // Component state using signals
-  formState = signal<LoginFormState>({
-    data: { username: '', password: '', rememberMe: false },
-    errors: {},
-    isLoading: false,
-    isSubmitted: false
-  });
+  isLoading = this.authService.isLoading;
+  error = this.authService.error;
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.markFormGroupTouched();
       return;
     }
 
-    this.updateFormState({ isLoading: true, isSubmitted: true, errors: {} });
-    
-    // Disable form while loading
     this.loginForm.disable();
 
-    const formData: LoginFormData = this.loginForm.value;
+    try {
+      const formData: LoginFormData = this.loginForm.value;
+      
+      const user = await this.authService.login({
+        username: formData.username,
+        password: formData.password
+      });
 
-    this.authService.login({
-      username: formData.username,
-      password: formData.password
-    }).subscribe({
-      next: (response) => {
-        this.updateFormState({ isLoading: false });
-        this.loginForm.enable();
-        
-        // Redirect based on user role
-        if (response.user.role === 'admin') {
-          this.router.navigateByUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
-        } else {
-          this.router.navigateByUrl(ROUTE_PATHS.USER.EMPLOYEES);
-        }
-      },
-      error: (error) => {
-        this.updateFormState({
-          isLoading: false,
-          errors: { general: error.message || 'Login failed. Please try again.' }
-        });
-        this.loginForm.enable();
+      if (user.role === 'admin') {
+        this.router.navigateByUrl(ROUTE_PATHS.ADMIN.DASHBOARD);
+      } else {
+        this.router.navigateByUrl(ROUTE_PATHS.USER.EMPLOYEES);
       }
-    });
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      this.loginForm.enable();
+    }
   }
 
   fillDemoAccount(account: { username: string; password: string }): void {
@@ -84,17 +69,9 @@ export class LoginComponent {
     });
   }
 
-  private updateFormState(updates: Partial<LoginFormState>): void {
-    this.formState.update(current => ({ ...current, ...updates }));
-  }
-
   // Utility methods for template
-  get isLoading(): boolean {
-    return this.formState().isLoading;
-  }
-
-  get generalError(): string | undefined {
-    return this.formState().errors.general;
+  get generalError(): string | null {
+    return this.error();
   }
 
   getFieldError(fieldName: string): string | null {
